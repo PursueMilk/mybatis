@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tk.mybatis.mapper.UserMapper">
+    <resultMap id="userMap" type="SysUser">
+        <id property="id" column="id"></id>
+        <result property="userName" column="user_name"></result>
+        <result property="userPassword" column="user_password"></result>
+        <result property="userEmail" column="user_email"></result>
+        <result property="userInfo" column="user_info"></result>
+        <result property="headImg" column="head_img" jdbcType="BLOB"></result>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"></result>
+    </resultMap>
+
+    <select id="selectById" resultMap="userMap">
+        select *
+        from sys_user
+        where id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="SysUser">
+        select id,
+               user_name     userName,
+               user_password userPassword,
+               user_email    userEmail,
+               user_info     userInfo,
+               head_img      headImg,
+               create_time   createTime
+        from sys_user
+    </select>
+
+
+    <select id="selectRolesByUserId" resultType="SysRole">
+        select r.id,
+               r.role_name   roleName,
+               r.enabled,
+               r.create_by   createBy,
+               r.create_time createTime
+        from sys_user_role ur
+                 inner join sys_role r on r.id = ur.role_id
+        where ur.user_id = #{userId}
+    </select>
+
+    <insert id="insert">
+        insert into sys_user(id, user_name, user_password, user_email, user_info, head_img, create_time)
+        values (#{id}, #{userName}, #{userPassword}, #{userEmail}, #{userInfo}, #{headImg,jdbcType=BLOB},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+
+
+    <insert id="insert2" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user(user_name, user_password,
+        <if test="userEmail != null and userEmail != ''">
+            user_email,
+        </if>
+        user_info, head_img, create_time)
+        values (#{userName}, #{userPassword},
+        <if test="userEmail != null and userEmail != ''">
+            #{userEmail},
+        </if>
+        #{userInfo}, #{headImg,jdbcType=BLOB},
+        #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+
+
+    <insert id="insert3">
+        insert into sys_user( user_name, user_password, user_email, user_info, head_img, create_time)
+        values (#{userName}, #{userPassword}, #{userEmail}, #{userInfo}, #{headImg,jdbcType=BLOB},
+        #{createTime,jdbcType=TIMESTAMP})
+        <selectKey keyColumn="id" resultType="long" keyProperty="id" order="AFTER">
+            Select LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+
+    <update id="updateById">
+        update sys_user
+        set user_name=#{userName},
+            user_password=#{userPassword},
+            user_email=#{userEmail},
+            user_info=#{userInfo},
+            head_img=#{headImg,jdbcType=BLOB},
+            create_time=#{createTime,jdbcType=TIMESTAMP}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from sys_user
+        where id = #{id}
+    </delete>
+
+    <select id="selectRolesByUserIdAndRoleEnabled" resultType="SysRole">
+        select r.id,
+               r.role_name   roleName,
+               r.enabled,
+               r.create_by   createBy,
+               r.create_time createTime
+        from sys_user_role ur
+                 inner join sys_role r on r.id = ur.role_id
+        where ur.user_id = #{userId}
+          and r.enabled = #{enabled}
+    </select>
+
+    <select id="selectByUser" resultType="SysUser">
+        select id,
+        user_name userName,
+        user_password userPassword,
+        user_email userEmail,
+        user_info userInfo,
+        head_img headImg,
+        create_time createTime
+        from sys_user
+        <where>
+            <if test="userName != null and userName != ''">
+                <if test="_databaseId == 'mysql'">
+                    and user_name like concat('%',#{userName}, '%')
+                </if>
+                <if test="_databaseId == 'oracle'">
+                    and user_name like '%'||#{userName}||'%'
+                </if>
+            </if>
+            <if test="userEmail != null and userEmail !=''">
+                and user_email = #{userEmail}
+            </if>
+        </where>
+    </select>
+
+
+    <update id="updateByIdSelective">
+        update sys_user
+        <set>
+            <if test="userName != null and userName != ''">
+                user_name=#{userName},
+            </if>
+            <if test=" userPassword != null and userPassword != ''">
+                user_password=#{userPassword},
+            </if>
+            <if test=" userEmail != null and userEmail != ''">
+                user_email=#{userEmail},
+            </if>
+            <if test=" userInfo != null and userInfo != ''">
+                user_info=#{userInfo},
+            </if>
+            <if test="headImg != null">
+                head_img=#{headImg,jdbcType=BLOB},
+            </if>
+            <if test="createTime != null">
+                create_time=#{createTime,jdbcType=TIMESTAMP},
+            </if>
+            id=#{id},
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <select id="selectByIdOrderUserName" resultType="SysUser">
+        select id,
+        user_name userName,
+        user_password userPassword,
+        user_email userEmail,
+        user_info userInfo,
+        head_img headImg,
+        create_time createTime
+        from sys_user
+        where 1 = 1
+        <choose>
+            <when test="id != null">
+                and id= #{id}
+            </when>
+            <when test="userName != null and userName != ''">
+                and user_name=#{userName}
+            </when>
+            <otherwise>
+                and 1=2
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectByIdList" resultType="SysUser">
+        select id,
+        user_name userName,
+        user_password userPassword,
+        user_email userEmail,
+        user_info userInfo,
+        head_img headImg,
+        create_time createTime
+        from sys_user
+        where id in
+        <foreach collection="list" open="(" close=")" separator="," item="id" index="i">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insertList" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user(user_name, user_password, user_email, user_info, head_img, create_time)
+        values
+        <foreach collection="list" separator="," item="user">
+            (#{user.userName},#{user.userPassword},#{user.userEmail},#{user.userInfo},#{user.headImg,jdbcType=BLOB},#{user.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
+    <update id="updateByMap">
+        update sys_user
+        set
+        <foreach collection="_parameter" item="val" index="key" separator=",">
+            ${key}=#{val}
+        </foreach>
+        where id=#{id}
+    </update>
+</mapper>
