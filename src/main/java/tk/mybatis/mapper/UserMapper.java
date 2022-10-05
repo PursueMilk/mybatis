@@ -23,7 +23,6 @@ public interface UserMapper {
      */
     List<SysUser> selectAll();
 
-
     /**
      * 根据用户id获取角色信息
      *
@@ -40,19 +39,6 @@ public interface UserMapper {
      * @return
      */
     int insert(SysUser sysUser);
-
-    /**
-     * 新增用户-获取数据库生成的id
-     *
-     * @param sysUser
-     * @return
-     */
-    int insert2(SysUser sysUser);
-
-    /**
-     * 新增用户-使用selectKey方式
-     */
-    int insert3(SysUser sysUser);
 
 
     /**
@@ -71,6 +57,21 @@ public interface UserMapper {
      * @return
      */
     int deleteById(Long id);
+
+
+    /**
+     * 新增用户-获取数据库生成的id
+     *
+     * @param sysUser
+     * @return
+     */
+    int insert2(SysUser sysUser);
+
+
+    /**
+     * 新增用户-使用selectKey方式
+     */
+    int insert3(SysUser sysUser);
 
 
     /**
@@ -130,8 +131,67 @@ public interface UserMapper {
 
     /**
      * 通过Map更新列
+     *
      * @param map
      * @return
      */
     int updateByMap(Map<String, Object> map);
+
+
+    /**
+     * 根据用户的id获取角色对象
+     *
+     * @param id
+     * @return
+     */
+    SysUser selectUserAndRoleById(Long id);
+
+    /**
+     * 根据用户id获取用户信息和用户的角色信息
+     *
+     * @param id
+     * @return
+     */
+    SysUser selectUserAndRoleById2(Long id);
+
+    /**
+     * 根据用户id获取用户信息和用户的角色信息
+     *
+     * @param id
+     * @return
+     */
+    SysUser selectUserAndRoleById3(Long id);
+
+
+    /**
+     * 根据用户id获取用户信息和用户的角色信息，嵌套查询方式
+     *
+     * @param id
+     * @return
+     */
+    SysUser selectUserAndRoleByIdSelect(Long id);
+
+
+    /**
+     * 获取所有的用户以及对应的所有角色
+     *
+     * @return
+     */
+    List<SysUser> selectAllUserAndRoles();
+
+
+    /**
+     * 获取所有的用户以及对应的所有角色以及权限
+     *
+     * @return
+     */
+    List<SysUser> selectAllUserAndRoles1();
+
+
+    /**
+     * 通过嵌套查询获取指定用户的信息以及用户的角色和权限信息
+     * @param id
+     * @return
+     */
+    SysUser selectAllUserAndRolesSelect(Long id);
 }

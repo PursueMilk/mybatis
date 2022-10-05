@@ -4,6 +4,7 @@
 
     <settings>
         <setting name="logImpl" value="LOG4J"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
         <!--        <setting name="mapUnderscoreToCamelCase" value="true"/>-->
     </settings>
 
@@ -34,8 +35,8 @@
         <package name="tk.mybatis.mapper"/>
     </mappers>
 
-
-    <!--    <mappers>-->
-    <!--        <mapper resource="tk/mybatis/mapper/CountryMapper.xml"></mapper>-->
-    <!--    </mappers>-->
+<!--
+        <mappers>
+            <mapper resource="tk/mybatis/mapper/CountryMapper.xml"></mapper>
+        </mappers>-->
 </configuration>

@@ -207,4 +207,190 @@
         </foreach>
         where id=#{id}
     </update>
+
+
+    <select id="selectUserAndRoleById" resultType="sysUser">
+        select u.id,
+               user_name     userName,
+               user_password userPassword,
+               user_email    userEmail,
+               user_info     userInfo,
+               head_img      headImg,
+               u.create_time createTime,
+               r.id          "role.id",
+               r.role_name   "role.roleName",
+               r.enabled     "role.enabled",
+               r.create_by   "role.createBy",
+               r.create_time "role.createTime"
+        from sys_user u
+                 inner join sys_user_role ur on ur.user_id = u.id
+                 inner join sys_role r on ur.role_id = r.id
+        where u.id = #{id}
+    </select>
+
+
+    <resultMap id="userRoleMap" type="sysUser" extends="userMap">
+        <!--        <id property="id" column="id"></id>
+                <result property="userName" column="user_name"></result>
+                <result property="userPassword" column="user_password"></result>
+                <result property="userEmail" column="user_email"></result>
+                <result property="userInfo" column="user_info"></result>
+                <result property="headImg" column="head_img" jdbcType="BLOB"></result>
+                <result property="createTime" column="create_time" jdbcType="TIMESTAMP"></result>-->
+        <!--role的相关属性-->
+        <result property="role.id" column="role_id"></result>
+        <result property="role.roleName" column="role_name"></result>
+        <result property="role.enabled" column="enabled"></result>
+        <result property="role.createBy" column="create_by"></result>
+        <result property="role.createTime" column="role_create_time" jdbcType="TIMESTAMP"></result>
+    </resultMap>
+
+    <select id="selectUserAndRoleById2" resultMap="userRoleMap">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               r.id          role_id,
+               r.role_name,
+               r.enabled     enabled,
+               r.create_by   create_by,
+               r.create_time role_create_time
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+        where u.id = #{id}
+    </select>
+
+
+    <resultMap id="userRoleMap1" extends="userMap" type="sysUser">
+        <association property="role" columnPrefix="role_" javaType="sysRole">
+            <result property="id" column="id"></result>
+            <result property="roleName" column="role_name"></result>
+            <result property="enabled" column="enabled"></result>
+            <result property="createBy" column="create_by"></result>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"></result>
+        </association>
+    </resultMap>
+
+    <resultMap id="userRoleMap2" extends="userMap" type="sysUser">
+        <association property="role" columnPrefix="role_"
+                     resultMap="tk.mybatis.mapper.RoleMapper.roleMap"></association>
+    </resultMap>
+
+    <select id="selectUserAndRoleById3" resultMap="userRoleMap1">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               r.id          role_id,
+               r.role_name   role_role_name,
+               r.enabled     role_enabled,
+               r.create_by   role_create_by,
+               r.create_time role_create_time
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+        where u.id = #{id}
+    </select>
+
+    <resultMap id="userRoleMapSelect" extends="userMap" type="SysUser">
+        <association property="role" column="{id=role_id}" fetchType="lazy"
+                     select="tk.mybatis.mapper.RoleMapper.selectRoleById">
+        </association>
+    </resultMap>
+
+
+    <select id="selectUserAndRoleByIdSelect" resultMap="userRoleMapSelect">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               ur.role_id
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+        where u.id = #{id}
+    </select>
+
+
+    <resultMap id="userRoleListMap" extends="userMap" type="sysUser">
+        <collection property="roleList" columnPrefix="role_"
+                    resultMap="tk.mybatis.mapper.RoleMapper.roleMap"></collection>
+    </resultMap>
+
+
+    <select id="selectAllUserAndRoles" resultMap="userRoleListMap">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               r.id          role_id,
+               r.role_name   role_role_name,
+               r.enabled     role_enabled,
+               r.create_by   role_create_by,
+               r.create_time role_create_time
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+    </select>
+
+
+    <resultMap id="userRoleListMap1" extends="userMap" type="sysUser">
+        <collection property="roleList" columnPrefix="role_"
+                    resultMap="tk.mybatis.mapper.RoleMapper.rolePrivilegeListMap"></collection>
+    </resultMap>
+
+    <select id="selectAllUserAndRoles1" resultMap="userRoleListMap1">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               r.id             role_id,
+               r.role_name      role_role_name,
+               r.enabled        role_enabled,
+               r.create_by      role_create_by,
+               r.create_time    role_create_time,
+               p.id             role_privilege_id,
+               p.privilege_name role_privilege_privilege_name,
+               p.privilege_url  role_privilege_privilege_url
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+                 inner join sys_role_privilege rp on rp.role_id = r.id
+                 inner join sys_privilege p on p.id = rp.privilege_id
+    </select>
+
+
+    <resultMap id="userRoleListMapSelect" extends="userMap" type="sysUser">
+        <collection property="roleList" fetchType="lazy" select="tk.mybatis.mapper.RoleMapper.selectRoleByUserId"
+                    column="{userId=id}">
+        </collection>
+    </resultMap>
+
+
+    <select id="selectAllUserAndRolesSelect" resultMap="userRoleListMapSelect">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time
+        from sys_user u
+        where u.id = #{id}
+    </select>
 </mapper>

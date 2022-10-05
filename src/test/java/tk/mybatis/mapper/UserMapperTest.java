@@ -3,6 +3,7 @@ package tk.mybatis.mapper;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
 import org.junit.Test;
+import tk.mybatis.pojo.SysPrivilege;
 import tk.mybatis.pojo.SysRole;
 import tk.mybatis.pojo.SysUser;
 
@@ -22,7 +23,7 @@ public class UserMapperTest extends BaseMapperTest {
             //判断用户是否为空
             Assert.assertNotNull(user);
             //判断用户的名称是否为admin
-            Assert.assertEquals("admin", user.getUserName());
+            Assert.assertEquals("admin_test", user.getUserName());
             System.out.println(user);
         } finally {
             //关闭sqlSession的连接
@@ -47,23 +48,6 @@ public class UserMapperTest extends BaseMapperTest {
 
     }
 
-
-    @Test
-    public void selectRolesByUserIdTest() {
-        SqlSession sqlSession = getSqlSession();
-        try {
-            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-            //调用selectRolesByUserId方法查询用户的角色
-            List<SysRole> roleList = userMapper.selectRolesByUserId(1L);
-            //结果不为空
-            Assert.assertNotNull(roleList);
-            //角色个数大于0个
-            Assert.assertTrue(roleList.size() > 0);
-        } finally {
-            sqlSession.close();
-        }
-    }
-
     @Test
     public void insertTest() {
         SqlSession sqlSession = getSqlSession();
@@ -71,7 +55,7 @@ public class UserMapperTest extends BaseMapperTest {
             UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
             //创建一个User对象
             SysUser user = new SysUser();
-            user.setUserName("test1");
+            user.setUserName("test3123");
             user.setUserPassword("123456");
             user.setUserEmail("test@mybatis.tk");
             user.setUserInfo("test info");
@@ -83,38 +67,12 @@ public class UserMapperTest extends BaseMapperTest {
             //只插入一条数据
             Assert.assertEquals(1, result);
             //id为null,没有给id赋值，并且没有配置回写id的值
-            Assert.assertNotNull(user.getId());
+            Assert.assertNull(user.getId());
         } finally {
             //默认的sqlSession是不自动提交的
             //因此不手动执行commit也不会提交到数据库
             sqlSession.rollback();
             //关闭sqlSession
-            sqlSession.close();
-        }
-    }
-
-
-    @Test
-    public void testInsert2() {
-        SqlSession sqlSession = getSqlSession();
-        try {
-            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-            //创建一个user对象
-            SysUser user = new SysUser();
-            user.setUserName("test1");
-            user.setUserPassword("123456");
-            user.setUserEmail("test@mybatis.tk");
-            user.setUserInfo("test info");
-            user.setHeadImg(new byte[]{1, 2, 3});
-            user.setCreateTime(new Date());
-            int result = userMapper.insert3(user);
-            //只插入一条数据
-            Assert.assertEquals(1, result);
-            //由于id回写，所以id不为null
-            Assert.assertNotNull(user.getId());
-            System.out.println(user.getId());
-        } finally {
-            sqlSession.rollback();
             sqlSession.close();
         }
     }
@@ -159,6 +117,48 @@ public class UserMapperTest extends BaseMapperTest {
             Assert.assertEquals(1, userMapper.deleteById(1L));
             //再次查询，数据应该为null
             Assert.assertNull(userMapper.selectById(1L));
+        } finally {
+            sqlSession.rollback();
+            sqlSession.close();
+        }
+    }
+
+    @Test
+    public void selectRolesByUserIdTest() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            //调用selectRolesByUserId方法查询用户的角色
+            List<SysRole> roleList = userMapper.selectRolesByUserId(1L);
+            //结果不为空
+            Assert.assertNotNull(roleList);
+            //角色个数大于0个
+            Assert.assertTrue(roleList.size() > 0);
+        } finally {
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testInsert2() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            //创建一个user对象
+            SysUser user = new SysUser();
+            user.setUserName("test1");
+            user.setUserPassword("123456");
+            user.setUserEmail("test@mybatis.tk");
+            user.setUserInfo("test info");
+            user.setHeadImg(new byte[]{1, 2, 3});
+            user.setCreateTime(new Date());
+            int result = userMapper.insert3(user);
+            //只插入一条数据
+            Assert.assertEquals(1, result);
+            //由于id回写，所以id不为null
+            Assert.assertNotNull(user.getId());
+            System.out.println(user.getId());
         } finally {
             sqlSession.rollback();
             sqlSession.close();
@@ -276,7 +276,7 @@ public class UserMapperTest extends BaseMapperTest {
             //当id和name都为空时
             user.setUserName(null);
             query = userMapper.selectByIdOrderUserName(user);
-            Assert.assertNotNull(query);
+            Assert.assertNull(query);
         } finally {
             //不要忘记关闭sqlSession
             sqlSession.close();
@@ -346,6 +346,141 @@ public class UserMapperTest extends BaseMapperTest {
             Assert.assertEquals("test@mybatis.tk", user.getUserEmail());
         } finally {
             sqlSession.rollback();
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectUserAndRoleById() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            SysUser user = userMapper.selectUserAndRoleById3(1001L);
+            //判断user是否为空
+            Assert.assertNotNull(user);
+            //用户的角色也不为空
+            Assert.assertNotNull(user.getRole());
+        } finally {
+            sqlSession.rollback();
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectUserAndRoleByIdSelect() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            SysUser user = userMapper.selectUserAndRoleByIdSelect(1001L);
+            //判断user是否为空
+            Assert.assertNotNull(user);
+            //默认equals、clone、hashCode、toString加载延迟数据
+            System.out.println("调用user.equals()方法");
+            user.equals(null);
+            System.out.println("调用user.getRole()");
+            //用户的角色也不为空
+            Assert.assertNotNull(user.getRole());
+        } finally {
+            //关闭session
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectAllUserAndRoles() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            List<SysUser> userList = userMapper.selectAllUserAndRoles();
+            System.out.println("用户数" + userList.size());
+            for (SysUser user : userList) {
+                System.out.println("用户名：" + user.getUserName());
+                for (SysRole role : user.getRoleList()) {
+                    System.out.println("角色名：" + role.getRoleName());
+                }
+            }
+        } finally {
+            //关闭session
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectAllUserAndRoles1() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            List<SysUser> userList = userMapper.selectAllUserAndRoles1();
+            System.out.println("用户数" + userList.size());
+            for (SysUser user : userList) {
+                System.out.println("用户名：" + user.getUserName());
+                for (SysRole role : user.getRoleList()) {
+                    System.out.println("角色名：" + role.getRoleName());
+                    for (SysPrivilege privilege : role.getPrivilegeList()) {
+                        System.out.println("权限名：" + privilege.getPrivilegeName());
+                    }
+                }
+            }
+        } finally {
+            //关闭session
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectAllUserAndRolesSelect() {
+        SqlSession sqlSession = getSqlSession();
+        try {
+            UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+            SysUser user = userMapper.selectAllUserAndRolesSelect(1L);
+            System.out.println("用户名" + user.getUserName());
+            for (SysRole role : user.getRoleList()) {
+                System.out.println("角色名：" + role.getRoleName());
+                for (SysPrivilege privilege : role.getPrivilegeList()) {
+                    System.out.println("权限名：" + privilege.getPrivilegeName());
+                }
+            }
+        } finally {
+            //关闭session
+            sqlSession.close();
+        }
+    }
+
+
+    @Test
+    public void testSelectRoleByUserIdChoose() {
+        //获取sqlSession
+        SqlSession sqlSession = getSqlSession();
+        try {
+            //获取RoleMapper接口
+            RoleMapper roleMapper = sqlSession.getMapper(RoleMapper.class);
+            //由于数据库enable都是1，给其中一个角色赋值0
+            SysRole role = roleMapper.selectById(2L);
+            role.setEnabled(0);
+            roleMapper.updateById(role);
+            //获取用户为1的角色
+            List<SysRole> roleList = roleMapper.selectRoleByUserIdChoose(1L);
+            for (SysRole r : roleList) {
+                System.out.println("角色名：" + r.getRoleName());
+                if (r.getId().equals(1L)) {
+                    //第一个角色存在权限信息
+                    Assert.assertNotNull(r.getPrivilegeList());
+                } else if (r.getId().equals(2L)) {
+                    //第二个角色不存在权限信息
+                    Assert.assertNull(r.getPrivilegeList());
+                    continue;
+                }
+                for (SysPrivilege privilege : r.getPrivilegeList()) {
+                    System.out.println("权限名：" + privilege.getPrivilegeName());
+                }
+            }
+        }finally {
+            //关闭sqlSession
             sqlSession.close();
         }
     }
